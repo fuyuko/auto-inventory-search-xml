@@ -1,0 +1,103 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>XML Inventory Test</title>
+<script type="text/javascript" src="jquery-2.1.0.min.js"></script>
+<script>
+
+	$(document).ready(function(){
+		$.ajax({
+			type: "GET",
+			url: "http://ideas.fuyuko.net/xml-parse-jquery/auto-inventory.xml",
+			dataType: "xml",
+			success: function(xml) {
+				var makes = [];
+				var models = {};
+				var make, model;
+				$(xml).find('ASSET').each(function(){
+					
+					var make = $(this).find('MAKE').text();		
+					var model = $(this).find('MODEL').text();	
+					
+					if((jQuery.inArray(make, makes)) == -1){
+						 makes.push(make);
+						 models[make] = new Array();
+						 models[make].push(model);
+					}
+					else{
+						if((jQuery.inArray(model, models[make])) == -1){
+							models[make].push(model);
+						}
+					}
+				});
+				
+				makes.sort();
+				$('<option>Select Model</option>').appendTo('#make-select');
+				
+				jQuery.each(makes, function(key, value){		
+					$('<option>'+value+'</option>').appendTo('#make-select');	
+					models[value].sort();
+				});
+				
+				//when Make is selected
+				$("#make-select" ).change(function() {
+					make = $( "#make-select option:selected" ).text();
+					model = "";
+					var selections = '<label>Select Model:</label><select name="model-select" id="model-select"><option>Select Model</option>';
+					
+					jQuery.each(models[make], function(key, value){		
+						selections = selections + '<option>' + value + '</option>';
+					});
+						
+					selections = selections + '</select>';	
+					$('#model-list').empty();		
+					$(selections).appendTo('#model-list');
+					
+					//when Model is selected
+					$("#model-select").change(function() {
+						model = $( "#model-select option:selected" ).text();
+						
+						var results = '<table><tr><th>Year</th><th>Make</th><th>Model</th><th>Vehicle Row</th></tr>';
+						$(xml).find('ASSET').each(function(){
+						
+							var year_temp = $(this).find('iYEAR').text();		
+							var row_temp = $(this).find('VEHICLE_ROW').text();	
+							var make_temp = $(this).find('MAKE').text();		
+							var model_temp = $(this).find('MODEL').text();	
+							
+							if((make == make_temp) && (model == model_temp)){
+								results = results + '<tr><td>'+year_temp+'</td>'+'<td>'+make_temp+'</td>'+'<td>'+model_temp+'</td>'+'<td>'+row_temp+'</td></tr>';
+							}
+
+						});
+						
+						results = results + '</table>';
+						$('#result').empty();		
+						$(results).appendTo('#result');
+						
+					});
+					
+				});
+
+				
+									
+		
+
+
+			} //end of success
+		});
+	});
+	
+</script>
+</head>
+<body>
+
+<div id="make-list">
+    <label>Select Make:</label><select name="make-select" id="make-select" ></select>
+</div>
+<div id="model-list"></div>
+
+<div id="result"></div>
+</body>
+</html>
