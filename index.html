@@ -12,7 +12,7 @@
 			url: "http://ideas.fuyuko.net/xml-parse-jquery/auto-inventory.xml",
 			dataType: "xml",
 			success: function(xml) {
-				var makes = [];
+				var makes = [], temp_array = [];
 				var models = {};
 				var make, model;
 				$(xml).find('ASSET').each(function(){
@@ -58,7 +58,7 @@
 					$("#model-select").change(function() {
 						model = $( "#model-select option:selected" ).text();
 						
-						var results = '<table><tr><th>Year</th><th>Make</th><th>Model</th><th>Vehicle Row</th></tr>';
+						temp_array = [];
 						$(xml).find('ASSET').each(function(){
 						
 							var year_temp = $(this).find('iYEAR').text();		
@@ -67,12 +67,14 @@
 							var model_temp = $(this).find('MODEL').text();	
 							
 							if((make == make_temp) && (model == model_temp)){
-								results = results + '<tr><td>'+year_temp+'</td>'+'<td>'+make_temp+'</td>'+'<td>'+model_temp+'</td>'+'<td>'+row_temp+'</td></tr>';
+								var line = '<tr><td>'+year_temp+'</td>'+'<td>'+make_temp+'</td>'+'<td>'+model_temp+'</td>'+'<td>'+row_temp+'</td></tr>';
+								temp_array.push(line);								
 							}
 
 						});
-						
-						results = results + '</table>';
+						temp_array.sort();
+						temp_array.reverse();
+						var results = '<table><tr><th>Year</th><th>Make</th><th>Model</th><th>Vehicle Row</th></tr>' + temp_array.join('') + '</table>';
 						$('#result').empty();		
 						$(results).appendTo('#result');
 						
